@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-import os
 from contextlib import asynccontextmanager
 from datetime import datetime
 from uuid import UUID
 
 from fastapi import FastAPI, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from src import database
 from src.resume_converter import convert_resume_to_latex
+from src.settings import get_settings
 
 
 class ConvertResumeRequest(BaseModel):
@@ -25,6 +25,8 @@ class CategoryCreate(BaseModel):
 
 
 class CategoryResponse(CategoryCreate):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     created_at: datetime
 
@@ -39,13 +41,15 @@ class ResumeCreate(BaseModel):
 
 
 class ResumeResponse(ResumeCreate):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     created_at: datetime
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    if os.getenv("DATABASE_URL", "").strip():
+    if get_settings().database_configured:
         await database.initialize_database()
     yield
 
@@ -55,7 +59,7 @@ app = FastAPI(title="Resume LaTeX Converter", lifespan=lifespan)
 
 @app.get("/health")
 async def health() -> dict[str, bool]:
-    return {"ok": True, "database_configured": bool(os.getenv("DATABASE_URL", "").strip())}
+    return {"ok": True, "database_configured": get_settings().database_configured}
 
 
 @app.post("/api/convert-to-latex", response_model=ConvertedResume)

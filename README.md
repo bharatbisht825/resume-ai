@@ -26,6 +26,14 @@ Set `DATABASE_URL` in `.env` when using resume storage:
 DATABASE_URL=postgresql://user:password@localhost:5432/resume_ai
 ```
 
+Alternatively, configure `DATABASE_USER`, `DATABASE_PASSWORD`,
+`DATABASE_HOST`, `DATABASE_PORT`, and `DATABASE_NAME`. The default database
+name is `resume_ai`. [settings.py](/home/bharat-jammy/Documents/resume-ai/src/settings.py)
+builds the async SQLAlchemy URL using the `asyncpg` driver. The SQLModel
+entities and async engine/session setup are in
+[models.py](/home/bharat-jammy/Documents/resume-ai/src/models.py) and
+[database.py](/home/bharat-jammy/Documents/resume-ai/src/database.py).
+
 The application creates the two planned tables and the one-master-per-category
 unique index automatically when it starts with `DATABASE_URL` configured.
 
